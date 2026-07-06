@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+litellm
+python-dotenv
+pypdf
+python-docx
+openpyxl
