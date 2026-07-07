@@ -2,7 +2,6 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
-import os
 from fastapi import FastAPI, UploadFile, File, Form
 from litellm import completion, completion_cost
 import traceback
@@ -10,44 +9,73 @@ from pypdf import PdfReader
 import io
 from docx import Document
 from openpyxl import load_workbook
-import sqlite3
+import psycopg2
 
 app = FastAPI()
 
-conn = sqlite3.connect("budgets.db", check_same_thread=False)
+#connecting to postgresql to keep track of budgets
+conn = psycopg2.connect(
+    os.getenv("DATABASE_URL")
+)
+
 cursor = conn.cursor()
 
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS team_usage (
-    team TEXT PRIMARY KEY,
-    spent REAL
+CREATE TABLE IF NOT EXISTS teams (
+    name TEXT PRIMARY KEY,
+    budget DOUBLE PRECISION,
+    spent DOUBLE PRECISION
 )
 """)
 
 conn.commit()
 
+
+#tracking budget
 def get_spent(team: str) -> float:
-    cursor.execute("SELECT spent FROM team_usage WHERE team=?", (team,))
+    cursor.execute("SELECT spent FROM teams WHERE name=%s", (team,))
     row = cursor.fetchone()
     return row[0] if row else 0.0
 
 
 def update_spent(team: str, new_spent: float):
-    cursor.execute("""
-        INSERT INTO team_usage (team, spent)
-        VALUES (?, ?)
-        ON CONFLICT(team) DO UPDATE SET spent=excluded.spent
-    """, (team, new_spent))
+    cursor.execute(
+    "UPDATE teams SET spent=%s WHERE name=%s",
+    (new_spent, team)
+)
     conn.commit()
 
+def get_budget(team: str):
+    cursor.execute(
+        "SELECT budget FROM teams WHERE name=%s",
+        (team,)
+    )
 
-team_budgets = {
-    "team 1": 20.0,
-    "team 2": 20.0,
-    "team 3": 20.0,
-    "team 4": 20.0
-}
+    row = cursor.fetchone()
 
+    return row[0] if row else None
+
+#budgets with postgresql
+teams = [
+    ("team 1", 20.0, 0.0),
+    ("team 2", 20.0, 0.0),
+    ("team 3", 20.0, 0.0),
+    ("team 4", 20.0, 0.0),
+]
+
+for team in teams:
+    cursor.execute(
+        """
+        INSERT INTO teams(name,budget,spent)
+        VALUES (%s,%s,%s)
+        ON CONFLICT (name) DO NOTHING
+        """,
+        team
+    )
+
+conn.commit()
+
+#file upload info, supports .txt, word, excel, and pdf
 async def extract_text(file: UploadFile):
 
     if file is None:
@@ -113,9 +141,8 @@ async def extract_text(file: UploadFile):
     else:
         raise ValueError("Unsupported file type.")
     
-    await file.close()
 
-
+#chat function
 @app.post("/chat")
 async def chat(
     team: str = Form(...),
@@ -125,11 +152,14 @@ async def chat(
     file: UploadFile = File(None)
 ):
 
-    if team not in team_budgets:
+    budget = get_budget(team)
+
+    if budget is None:
         return {"error": "Unknown team"}
 
     spent = get_spent(team)
-    remaining = team_budgets[team] - spent
+
+    remaining = budget - spent  
 
     if remaining <= 0:
         return {
@@ -174,7 +204,7 @@ async def chat(
             "model": model,
             "cost": cost,
             "spent": get_spent(team),
-            "remaining": team_budgets[team] - spent
+            "remaining": budget - new_spent
         }
 
     except Exception as e:

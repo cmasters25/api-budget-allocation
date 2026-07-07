@@ -6,3 +6,4 @@ pypdf
 python-docx
 openpyxl
 python-multipart
+psycopg2-binary
