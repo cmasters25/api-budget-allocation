@@ -51,7 +51,7 @@ async function sendMessage() {
 
 
         const response = await fetch(
-            "https://YOUR-RENDER-URL.onrender.com/chat",
+            "https://api-budget-allocation.onrender.com/chat",
             {
                 method: "POST",
                 body: formData
