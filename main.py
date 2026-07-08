@@ -16,6 +16,14 @@ from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
+#for reset/change: use password
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
+def verify_admin(password: str):
+    if password != ADMIN_PASSWORD:
+        return False
+    return True
+
 #for ui
 app.add_middleware(
     CORSMiddleware,
@@ -233,15 +241,23 @@ async def chat(
         return {"error": str(e)}
     
 
-#reset budget
-@app.post("/admin/reset-budget")
-def reset_budget(new_budget: float = 10.0):
+#update budget
+@app.post("/admin/update-budget")
+def update_budget(
+    password: str,
+    new_budget: float = 10.0
+):
+
+    if not verify_admin(password):
+        return {
+            "status": "error",
+            "message": "Unauthorized"
+        }
 
     cursor.execute(
         """
         UPDATE teams
-        SET budget=%s,
-            spent=0.0
+        SET budget=%s
         """,
         (new_budget,)
     )
@@ -250,6 +266,29 @@ def reset_budget(new_budget: float = 10.0):
 
     return {
         "status": "success",
-        "message": "Budgets reset",
+        "message": "Budget updated",
         "new_budget": new_budget
+    }
+
+@app.post("/admin/reset-usage")
+def reset_usage(password: str):
+
+    if not verify_admin(password):
+        return {
+            "status": "error",
+            "message": "Unauthorized"
+        }
+
+    cursor.execute(
+        """
+        UPDATE teams
+        SET spent=0.0
+        """
+    )
+
+    conn.commit()
+
+    return {
+        "status": "success",
+        "message": "All usage has been reset"
     }
