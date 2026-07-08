@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Budget Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>AI Budget Assistant</h1>
+
+        <div class="settings">
+
+            <label>Team</label>
+            <select id="team">
+                <option value="team 1">Team 1</option>
+                <option value="team 2">Team 2</option>
+                <option value="team 3">Team 3</option>
+                <option value="team 4">Team 4</option>
+                <option value="team 5">Team 5</option>
+                <option value="team 6">Team 6</option>
+                <option value="team 7">Team 7</option>
+                <option value="team 8">Team 8</option>
+                <option value="team 9">Team 9</option>
+            </select>
+
+
+            <label>Provider</label>
+            <select id="provider">
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="xai">Grok</option>
+            </select>
+
+
+            <label>Model</label>
+            <input id="model" placeholder="example: gpt-4o-mini" value="gpt-4o-mini">
+
+        </div>
+
+
+        <div id="chat-box">
+
+        </div>
+
+
+        <div class="input-area">
+
+            <textarea id="message" placeholder="Ask something..."></textarea>
+
+
+            <input type="file" id="file">
+
+
+            <button onclick="sendMessage()">
+                Send
+            </button>
+
+        </div>
+
+
+        <div class="budget">
+            <p id="budget-info">
+                Budget information will appear here
+            </p>
+        </div>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
