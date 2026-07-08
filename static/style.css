@@ -1,7 +1,13 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: Inter, sans-serif;
     background: #f4f6f8;
     margin: 0;
+}
+
+h1,
+h2,
+h3 {
+    font-weight: 700;
 }
 
 
@@ -70,7 +76,7 @@ textarea {
 
 .user {
 
-    background: #dbeafe;
+    background: #fedbf8;
     text-align: right;
 
 }
@@ -89,7 +95,7 @@ button {
     padding: 12px 25px;
     border: none;
     border-radius: 10px;
-    background: #2563eb;
+    background: #984387;
     color: white;
     cursor: pointer;
 
@@ -98,7 +104,7 @@ button {
 
 button:hover {
 
-    background: #1d4ed8;
+    background: #984387;
 
 }
 
