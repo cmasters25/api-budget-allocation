@@ -231,3 +231,25 @@ async def chat(
 
     except Exception as e:
         return {"error": str(e)}
+    
+
+#reset budget
+@app.post("/admin/reset-budget")
+def reset_budget(new_budget: float = 10.0):
+
+    cursor.execute(
+        """
+        UPDATE teams
+        SET budget=%s,
+            spent=0.0
+        """,
+        (new_budget,)
+    )
+
+    conn.commit()
+
+    return {
+        "status": "success",
+        "message": "Budgets reset",
+        "new_budget": new_budget
+    }
