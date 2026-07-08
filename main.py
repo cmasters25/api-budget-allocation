@@ -10,8 +10,21 @@ import io
 from docx import Document
 from openpyxl import load_workbook
 import psycopg2
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+
+#for ui
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 #connecting to postgresql to keep track of budgets
 conn = psycopg2.connect(
@@ -57,10 +70,15 @@ def get_budget(team: str):
 
 #budgets with postgresql
 teams = [
-    ("team 1", 20.0, 0.0),
-    ("team 2", 20.0, 0.0),
-    ("team 3", 20.0, 0.0),
-    ("team 4", 20.0, 0.0),
+    ("team 1", 10.0, 0.0),
+    ("team 2", 10.0, 0.0),
+    ("team 3", 10.0, 0.0),
+    ("team 4", 10.0, 0.0),
+    ("team 5", 10.0, 0.0),
+    ("team 6", 10.0, 0.0),
+    ("team 7", 10.0, 0.0),
+    ("team 8", 10.0, 0.0),
+    ("team 9", 10.0, 0.0),
 ]
 
 for team in teams:
@@ -141,6 +159,10 @@ async def extract_text(file: UploadFile):
     else:
         raise ValueError("Unsupported file type.")
     
+#homepage
+@app.get("/")
+async def home():
+    return FileResponse("static/index.html")
 
 #chat function
 @app.post("/chat")
